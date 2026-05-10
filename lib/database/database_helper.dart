@@ -4,6 +4,8 @@ import 'package:crypto/crypto.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import 'package:english_word_app/features/word_chain/models/story.dart';
+
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
@@ -34,7 +36,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onConfigure: _onConfigure,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
@@ -52,6 +54,7 @@ class DatabaseHelper {
     await _createFoldersTable(db);
     await _createWordsTable(db);
     await _createWordSamplesTable(db);
+    await _createStoriesTable(db);
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -68,6 +71,9 @@ class DatabaseHelper {
         'ALTER TABLE Words ADD COLUMN Picture TEXT',
       );
     }
+  if (oldVersion < 4) {
+    await _createStoriesTable(db);
+  }
   }
 
   Future<void> _createUsersTable(Database db) async {
@@ -122,6 +128,20 @@ class DatabaseHelper {
         EngSample    TEXT,
         TurSample    TEXT,
         FOREIGN KEY (WordID) REFERENCES Words(WordID) ON DELETE CASCADE
+      )
+    ''');
+  }
+   Future<void> _createStoriesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE Stories (
+        StoryID     INTEGER PRIMARY KEY AUTOINCREMENT,
+        ContentEN   TEXT    NOT NULL,
+        ContentTR   TEXT,
+        ImagePath   TEXT,
+        WordList    TEXT    NOT NULL,
+        WordIDs     TEXT    NOT NULL,
+        DisplayMode TEXT    NOT NULL DEFAULT 'both',
+        CreatedAt   TEXT    NOT NULL DEFAULT (datetime('now'))
       )
     ''');
   }
@@ -466,6 +486,35 @@ class DatabaseHelper {
       return rows.first['EngWordName'] as String;
     } catch (_) {
       return null;
+    }
+  }
+  Future<bool> insertStory(Story story) async {
+    try {
+      final db = await instance.database;
+      await db.insert('Stories', story.toMap());
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<List<Story>> getStories() async {
+    try {
+      final db = await instance.database;
+      final rows = await db.query('Stories', orderBy: 'CreatedAt DESC');
+      return rows.map((row) => Story.fromMap(row)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<bool> deleteStory(int id) async {
+    try {
+      final db = await instance.database;
+      await db.delete('Stories', where: 'StoryID = ?', whereArgs: [id]);
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 

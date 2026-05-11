@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:english_word_app/database/database_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _userNameController = TextEditingController();
     final _passwordController = TextEditingController();
-    
+
     @override
 Widget build(BuildContext context) {
   return Scaffold(
@@ -38,10 +39,37 @@ Widget build(BuildContext context) {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () {
-              // Şimdilik boş, sonra dolduracağız
-              print('Giriş butonu basıldı');
-            },
+            onPressed: () async {
+  final userName = _userNameController.text;
+  final password = _passwordController.text;
+  
+  // Boş kontrolü
+  if (userName.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Lütfen tüm alanları doldurun')),
+    );
+    return;
+  }
+  
+  // DatabaseHelper'a sor
+  final user = await DatabaseHelper.instance.getUserByCredentials(
+    userName,
+    password,
+  );
+  
+  if (user != null) {
+    // Giriş başarılı
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Hoş geldin! 🎉')),
+    );
+    // İleride: ana sayfaya yönlendir
+  } else {
+    // Hatalı
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Kullanıcı adı veya şifre yanlış')),
+    );
+  }
+},
             child: const Text('Giriş Yap'),
           ),
         ],

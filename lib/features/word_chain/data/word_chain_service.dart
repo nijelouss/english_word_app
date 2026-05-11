@@ -7,23 +7,31 @@ class WordChainService {
   final _gemini = GeminiService();
   final _imageStorage = ImageStorageService();
 
-  /// Hikaye üretir, görseli indirir ve DB'ye kaydeder.
-  /// Başarısızlıkta null döner.
   Future<Story?> generate({
     required List<int> wordIds,
     required List<String> wordNames,
     required String displayMode,
   }) async {
     // 1. Gemini'den metin + image_prompt al
-    final result = await _gemini.generateStory(wordNames, displayMode);
+    final Map<String, String?>? result;
+    try {
+      result = await _gemini.generateStory(wordNames, displayMode);
+    } catch (_) {
+      return null;
+    }
     if (result == null) return null;
 
     final englishStory = result['english_story'];
     final imagePrompt = result['image_prompt'];
     if (englishStory == null || imagePrompt == null) return null;
 
-    // 2. Görseli indir ve kaydet (başarısız olsa da devam et)
-    final imagePath = await _imageStorage.downloadAndSave(imagePrompt);
+    // 2. Görseli indir ve kaydet (başarısız olsa hikayeye devam et)
+    String? imagePath;
+    try {
+      imagePath = await _imageStorage.downloadAndSave(imagePrompt);
+    } catch (_) {
+      imagePath = null;
+    }
 
     // 3. Story nesnesini oluştur
     final story = Story(

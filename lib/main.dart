@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:english_word_app/screens/auth/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 5, 85, 17)),
       ),
-      home:LoginScreen(),
+      home: const LoginScreen(),
     );
   }
 }

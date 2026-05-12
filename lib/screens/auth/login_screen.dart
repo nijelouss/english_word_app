@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
+import 'package:english_word_app/features/word_chain/screens/word_selection_screen.dart';
+import 'package:english_word_app/screens/auth/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,6 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 24),
+            TextButton(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const RegisterScreen()),
+              ),
+              child: const Text('Hesabın yok mu? Kayıt Ol'),
+            ),
+            const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () async {
                 final email = _emailController.text;
@@ -59,6 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
 
                 final messenger = ScaffoldMessenger.of(context);
+                final navigator = Navigator.of(context);
 
                 final userId = await DatabaseHelper.instance.loginUser(
                   email,
@@ -68,8 +79,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (!mounted) return;
 
                 if (userId != null) {
-                  messenger.showSnackBar(
-                    const SnackBar(content: Text('Hoş geldin!')),
+                  navigator.pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const WordSelectionScreen(),
+                    ),
                   );
                 } else {
                   messenger.showSnackBar(

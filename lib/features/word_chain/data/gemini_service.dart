@@ -70,7 +70,7 @@ class GeminiService {
 
   String _buildPrompt(List<String> words, String displayMode) {
     final wordList = words.join(', ');
-    final needsTurkish = displayMode == 'tr' || displayMode == 'both';
+    final needsTurkish = displayMode == 'TR' || displayMode == 'EN+TR';
 
     return '''
 You are a language learning assistant. Respond ONLY with valid JSON, no markdown.

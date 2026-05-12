@@ -12,13 +12,8 @@ class WordChainService {
     required List<String> wordNames,
     required String displayMode,
   }) async {
-    // 1. Gemini'den metin + image_prompt al
-    final Map<String, String?>? result;
-    try {
-      result = await _gemini.generateStory(wordNames, displayMode);
-    } catch (_) {
-      return null;
-    }
+    // 1. Gemini'den metin + image_prompt al — exception'lar üste taşınır
+    final result = await _gemini.generateStory(wordNames, displayMode);
     if (result == null) return null;
 
     final englishStory = result['english_story'];

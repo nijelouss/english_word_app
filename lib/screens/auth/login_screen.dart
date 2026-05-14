@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
-import 'package:english_word_app/features/word_chain/screens/word_selection_screen.dart';
 import 'package:english_word_app/screens/auth/register_screen.dart';
+// Senin yazdığın ana menüyü buraya bağladık!
+import 'package:english_word_app/screens/home/home_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,14 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RegisterScreen()),
-              ),
-              child: const Text('Hesabın yok mu? Kayıt Ol'),
-            ),
-            const SizedBox(height: 8),
+            
+            // GİRİŞ YAP BUTONU
             ElevatedButton(
               onPressed: () async {
                 final email = _emailController.text;
@@ -81,7 +76,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (userId != null) {
                   navigator.pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => WordSelectionScreen(userId: userId),
+                      builder: (_) => HomeScreen(
+                        userId: userId,
+                        userName: email.split('@')[0],
+                      ),
                     ),
                   );
                 } else {
@@ -91,6 +89,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 }
               },
               child: const Text('Giriş Yap'),
+            ),
+            
+            const SizedBox(height: 12),
+            
+            // KAYIT OL BUTONU (Artık sadece 1 tane var ve hatasız)
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RegisterScreen(), 
+                  ),
+                );
+              },
+              child: const Text('Hesabın yok mu? Kayıt Ol'),
             ),
           ],
         ),

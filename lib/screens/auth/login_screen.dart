@@ -81,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (userId != null) {
                   navigator.pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => const WordSelectionScreen(),
+                      builder: (_) => WordSelectionScreen(userId: userId),
                     ),
                   );
                 } else {

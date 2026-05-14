@@ -535,6 +535,42 @@ class DatabaseHelper {
   }
 
   // ─────────────────────────────────────────────
+  // AYARLAR
+  // ─────────────────────────────────────────────
+
+  Future<int> getDailyNewWordCount(int userId) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.query(
+        'Users',
+        columns: ['DailyWordLimit'],
+        where: 'UserID = ?',
+        whereArgs: [userId],
+        limit: 1,
+      );
+      if (rows.isEmpty) return 10;
+      return (rows.first['DailyWordLimit'] as int?) ?? 10;
+    } catch (_) {
+      return 10;
+    }
+  }
+
+  Future<bool> setDailyNewWordCount(int userId, int count) async {
+    try {
+      final db = await instance.database;
+      await db.update(
+        'Users',
+        {'DailyWordLimit': count},
+        where: 'UserID = ?',
+        whereArgs: [userId],
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // ─────────────────────────────────────────────
 
   Future<void> close() async {
     final db = await instance.database;

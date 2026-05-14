@@ -1,3 +1,4 @@
+import 'package:english_word_app/screens/settings/settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:english_word_app/core/exceptions.dart';
 import 'package:english_word_app/database/database_helper.dart';
@@ -5,7 +6,8 @@ import 'package:english_word_app/features/word_chain/data/word_chain_service.dar
 import 'package:english_word_app/features/word_chain/screens/story_result_screen.dart';
 
 class WordSelectionScreen extends StatefulWidget {
-  const WordSelectionScreen({super.key});
+  final int userId;
+  const WordSelectionScreen({super.key, required this.userId});
 
   @override
   State<WordSelectionScreen> createState() => _WordSelectionScreenState();
@@ -95,6 +97,17 @@ class _WordSelectionScreenState extends State<WordSelectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Kelime Seç'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => SettingsScreen(userId: widget.userId),
+              ),
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

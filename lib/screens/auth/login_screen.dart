@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
+import 'package:english_word_app/screens/auth/register_screen.dart';
+// Senin yazdığın ana menüyü buraya bağladık!
+import 'package:english_word_app/screens/home/home_screen.dart'; 
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,14 +49,8 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            TextButton(
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RegisterScreen()),
-              ),
-              child: const Text('Hesabın yok mu? Kayıt Ol'),
-            ),
-            const SizedBox(height: 8),
+            
+            // GİRİŞ YAP BUTONU
             ElevatedButton(
               onPressed: () async {
                 final email = _emailController.text;
@@ -79,7 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (userId != null) {
                   navigator.pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => const WordSelectionScreen(),
+                      // DİKKAT: Artık giriş yapınca doğrudan senin yazdığın Ana Menüye gidecek!
+                      builder: (_) => HomeScreen(
+                        userId: userId, 
+                        // E-postanın @ işaretinden önceki kısmını isim olarak yolluyoruz
+                        userName: email.split('@')[0], 
+                      ),
                     ),
                   );
                 } else {
@@ -90,18 +92,21 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: const Text('Giriş Yap'),
             ),
-            const SizedBox(height: 12), // İki buton arasına ufak bir boşluk
-          
-          TextButton(
-            onPressed: () {
-              // Defterin üzerine yeni bir sayfa (RegisterScreen) koyuyoruz
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const RegisterScreen()),
-              );
-            },
-            child: const Text('Hesabın yok mu? Kayıt Ol'),
-          ),
+            
+            const SizedBox(height: 12),
+            
+            // KAYIT OL BUTONU (Artık sadece 1 tane var ve hatasız)
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RegisterScreen(), 
+                  ),
+                );
+              },
+              child: const Text('Hesabın yok mu? Kayıt Ol'),
+            ),
           ],
         ),
       ),

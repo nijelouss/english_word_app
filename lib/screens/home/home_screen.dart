@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/screens/auth/login_screen.dart';
 import 'package:english_word_app/features/word_chain/screens/word_selection_screen.dart';
+import 'package:english_word_app/screens/word/add_word_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int userId;
@@ -25,8 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _logout() {
-    // Mevcut tüm sayfa yığınını (stack) temizleyerek login ekranına döner.
-    // Böylece Android'de geri tuşuna basıldığında tekrar Home ekranına dönülmez.
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -55,11 +54,19 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSpacing: 16.0,
           crossAxisSpacing: 16.0,
           children: [
+            // KELİME EKLE KARTINI BURAYA BAĞLADIK
             _buildMenuCard(
               icon: Icons.add_circle_outline,
               title: 'Kelime Ekle',
               description: 'Yeni İngilizce kelime ekle',
-              onTap: _showComingSoon,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddWordScreen(userId: widget.userId),
+                  ),
+                );
+              },
             ),
             _buildMenuCard(
               icon: Icons.quiz_outlined,
@@ -72,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
               title: 'Wordle',
               description: 'Öğrendiğin kelimelerle oyna',
               onTap: _showComingSoon,
-            ),
+                ),
             _buildMenuCard(
               icon: Icons.auto_stories,
               title: 'Hikaye Oluştur',
@@ -81,7 +88,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const WordSelectionScreen(),
+                    // const kelimesini kaldırıp hatayı sıfırladık
+                    builder: (_) => WordSelectionScreen(),
                   ),
                 );
               },

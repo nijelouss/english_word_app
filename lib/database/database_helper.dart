@@ -488,6 +488,22 @@ class DatabaseHelper {
       return null;
     }
   }
+  Future<List<Map<String, dynamic>>> getLearnedWords() async {
+    try {
+      final db = await instance.database;
+      return await db.rawQuery(
+        '''
+        SELECT w.WordID, w.EngWordName, w.TurWordName
+        FROM   Words w
+        WHERE  w.IsLearned = 1
+        ORDER BY w.EngWordName ASC
+        ''',
+      );
+    } catch (_) {
+      return [];
+    }
+  }
+
   Future<bool> insertStory(Story story) async {
     try {
       final db = await instance.database;

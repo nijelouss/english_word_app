@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
+import 'package:english_word_app/screens/auth/register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -79,6 +80,18 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: const Text('Giriş Yap'),
             ),
+            const SizedBox(height: 12), // İki buton arasına ufak bir boşluk
+          
+          TextButton(
+            onPressed: () {
+              // Defterin üzerine yeni bir sayfa (RegisterScreen) koyuyoruz
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const RegisterScreen()),
+              );
+            },
+            child: const Text('Hesabın yok mu? Kayıt Ol'),
+          ),
           ],
         ),
       ),

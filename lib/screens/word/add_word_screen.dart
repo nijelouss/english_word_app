@@ -51,8 +51,15 @@ class _AddWordScreenState extends State<AddWordScreen> {
     }
 
     try {
+      var folders = await DatabaseHelper.instance.getFolders(widget.userId);
+      if (folders.isEmpty) {
+        await DatabaseHelper.instance.createFolder(widget.userId, 'Genel');
+        folders = await DatabaseHelper.instance.getFolders(widget.userId);
+      }
+      final folderId = folders.first['FolderID'] as int;
+
       final success = await DatabaseHelper.instance.addWord(
-        1, // Şimdilik sabit klasör ID
+        folderId,
         engText.toLowerCase(),
         turText,
         engSample: engSampleText.isEmpty ? null : engSampleText,

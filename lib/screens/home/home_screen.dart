@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:english_word_app/screens/auth/login_screen.dart';
 import 'package:english_word_app/features/word_chain/screens/word_selection_screen.dart';
 import 'package:english_word_app/screens/word/add_word_screen.dart';
+import 'package:english_word_app/screens/settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int userId;
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     // const kelimesini kaldırıp hatayı sıfırladık
-                    builder: (_) => WordSelectionScreen(),
+                    builder: (_) => WordSelectionScreen(userId: widget.userId),
                   ),
                 );
               },
@@ -104,7 +105,14 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.settings,
               title: 'Ayarlar',
               description: 'Günlük kelime sayısı',
-              onTap: _showComingSoon,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => SettingsScreen(userId: widget.userId),
+                  ),
+                );
+              },
             ),
           ],
         ),

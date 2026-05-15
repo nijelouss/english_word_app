@@ -4,6 +4,7 @@ import 'package:english_word_app/features/word_chain/screens/word_selection_scre
 import 'package:english_word_app/screens/word/add_word_screen.dart';
 import 'package:english_word_app/screens/settings/settings_screen.dart';
 import 'package:english_word_app/screens/quiz/quiz_screen.dart';
+import 'package:english_word_app/screens/wordle/wordle_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int userId;
@@ -87,8 +88,15 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.games_outlined,
               title: 'Wordle',
               description: 'Öğrendiğin kelimelerle oyna',
-              onTap: _showComingSoon,
-                ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => WordleScreen(userId: widget.userId),
+                  ),
+                );
+              },
+            ),
             _buildMenuCard(
               icon: Icons.auto_stories,
               title: 'Hikaye Oluştur',

@@ -10,54 +10,57 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // Kullanıcının yazdığı yazıları tutacak olan "Controller"larımız
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _securityAnswerController = TextEditingController();
 
-  // Ekran kapatıldığında hafızayı temizlemek için (Best Practice)
+  String? _selectedQuestion;
+
+  static const List<String> _questions = [
+    'Annenizin kızlık soyadı nedir?',
+    'İlk evcil hayvanınızın adı nedir?',
+    'Doğduğunuz şehir neresi?',
+    'İlkokul öğretmeninizin adı nedir?',
+    'En sevdiğiniz yemek nedir?',
+  ];
+
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _securityAnswerController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kayıt Ol'),
-      ),
-      body: Padding(
+      appBar: AppBar(title: const Text('Kayıt Ol')),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 1. E-posta Alanı
             TextField(
               controller: _emailController,
-              keyboardType: TextInputType.emailAddress, // Klavyede @ işaretini öne çıkarır
+              keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 labelText: 'E-posta',
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 16), // Araya 16 piksel boşluk koy
-
-            // 2. Şifre Alanı
+            const SizedBox(height: 16),
             TextField(
               controller: _passwordController,
-              obscureText: true, // Yazılanları yıldızlar (***)
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'Şifre (En az 6 karakter)',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
-
-            // 3. Şifre Tekrar Alanı
             TextField(
               controller: _confirmPasswordController,
               obscureText: true,
@@ -66,55 +69,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 24), // Buton için daha büyük bir boşluk
-            // Kayıt Ol Butonu
+            const SizedBox(height: 24),
+            DropdownButtonFormField<String>(
+              initialValue: _selectedQuestion,
+              decoration: const InputDecoration(
+                labelText: 'Güvenlik Sorusu',
+                border: OutlineInputBorder(),
+              ),
+              items: _questions
+                  .map((q) => DropdownMenuItem(value: q, child: Text(q, overflow: TextOverflow.ellipsis)))
+                  .toList(),
+              onChanged: (val) => setState(() => _selectedQuestion = val),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _securityAnswerController,
+              decoration: const InputDecoration(
+                labelText: 'Güvenlik Sorusu Cevabı',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
-                // 1. Kutulardaki yazıları okuyup değişkenlere alıyoruz
-                // trim() komutu, kullanıcı yanlışlıkla boşluk bırakırsa onu siler
                 final email = _emailController.text.trim();
                 final password = _passwordController.text;
                 final confirmPassword = _confirmPasswordController.text;
+                final answer = _securityAnswerController.text.trim();
 
-                // 2. KONTROL: Boş alan var mı?
                 if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Lütfen tüm alanları doldurun')),
                   );
-                  return; // Hata varsa kodu burada durdur, aşağıya geçme!
+                  return;
                 }
-
-                // 3. KONTROL: Şifre en az 6 karakter mi? (Senin kararın)
                 if (password.length < 6) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Şifre en az 6 karakter olmalıdır')),
                   );
                   return;
                 }
-
-                // 4. KONTROL: Şifreler uyuşuyor mu?
                 if (password != confirmPassword) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Şifreler eşleşmiyor')),
                   );
                   return;
                 }
+                if (_selectedQuestion == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Lütfen bir güvenlik sorusu seçin')),
+                  );
+                  return;
+                }
+                if (answer.length < 2) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Güvenlik cevabı en az 2 karakter olmalıdır')),
+                  );
+                  return;
+                }
 
-                // 5. VERİTABANI: Her şey doğruysa arkadaşının yazdığı koda gönder
-                final success = await DatabaseHelper.instance.registerUser(email, password);
+                final success = await DatabaseHelper.instance.registerUserWithSecurityQuestion(
+                  email,
+                  password,
+                  _selectedQuestion!,
+                  answer.toLowerCase(),
+                );
 
-                // 6. GÜVENLİK: Login ekranında öğrendiğimiz o meşhur kontrol
                 if (!context.mounted) return;
 
-                // 7. SONUÇ: Kayıt başarılı mı?
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Kayıt başarılı! Giriş yapabilirsiniz. 🎉')),
+                    const SnackBar(content: Text('Kayıt başarılı! Giriş yapabilirsiniz.')),
                   );
-                  // Başarılıysa bu sayfayı kapatıp otomatik olarak Login ekranına dön
                   Navigator.pop(context);
                 } else {
-                  // Eğer kayıt başarısız olursa (Büyük ihtimalle bu e-posta daha önce kaydedilmiş demektir)
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Bu e-posta adresi zaten kullanılıyor')),
                   );
@@ -122,14 +150,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               },
               child: const Text('Kayıt Ol'),
             ),
-            
-            const SizedBox(height: 12), // İki buton arası küçük boşluk
-            
-            // Kullanıcı vazgeçerse diye Giriş sayfasına dönme butonu
+            const SizedBox(height: 12),
             TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Sadece sayfayı kapatır, geri döner
-              },
+              onPressed: () => Navigator.pop(context),
               child: const Text('Zaten hesabın var mı? Giriş Yap'),
             ),
           ],

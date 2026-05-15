@@ -209,7 +209,6 @@ class _WordleScreenState extends State<WordleScreen> {
                     TextField(
                       controller: _controller,
                       maxLength: 5,
-                      textCapitalization: TextCapitalization.characters,
                       decoration: const InputDecoration(
                         labelText: 'Tahmininizi yazın',
                         border: OutlineInputBorder(),

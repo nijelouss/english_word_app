@@ -23,7 +23,7 @@ class AnalysisScreen extends StatefulWidget {
       Future<void> _loadStats() async {
     final stats = await DatabaseHelper.instance.getFolderStats(widget.userId);
     if (!mounted) return;
-    setState(() {
+    setState(() { 
       _folderStats = stats;
       _isLoading = false;
     });
@@ -79,7 +79,8 @@ class AnalysisScreen extends StatefulWidget {
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (_) => doc.save());
+    final bytes = await doc.save();
+    await Printing.sharePdf(bytes: bytes, filename: 'analiz_raporu.pdf');
   }
 
   pw.Widget _pdfCell(String text, pw.Font font) {

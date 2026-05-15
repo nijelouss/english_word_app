@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
 import 'package:english_word_app/screens/auth/register_screen.dart';
+import 'package:english_word_app/screens/auth/forgot_password_screen.dart';
 // Senin yazdığın ana menüyü buraya bağladık!
 import 'package:english_word_app/screens/home/home_screen.dart'; 
 
@@ -99,11 +100,23 @@ class _LoginScreenState extends State<LoginScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RegisterScreen(), 
+                    builder: (context) => RegisterScreen(),
                   ),
                 );
               },
               child: const Text('Hesabın yok mu? Kayıt Ol'),
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ForgotPasswordScreen(),
+                  ),
+                );
+              },
+              child: const Text('Şifremi Unuttum'),
             ),
           ],
         ),

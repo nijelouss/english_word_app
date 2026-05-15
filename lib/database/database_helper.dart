@@ -36,7 +36,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onConfigure: _onConfigure,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
@@ -74,6 +74,10 @@ class DatabaseHelper {
   if (oldVersion < 4) {
     await _createStoriesTable(db);
   }
+  if (oldVersion < 5) {
+    await db.execute('ALTER TABLE Users ADD COLUMN SecurityQuestion TEXT');
+    await db.execute('ALTER TABLE Users ADD COLUMN SecurityAnswer TEXT');
+  }
   }
 
   Future<void> _createUsersTable(Database db) async {
@@ -84,7 +88,9 @@ class DatabaseHelper {
         Email          TEXT    NOT NULL UNIQUE,
         PasswordHash   TEXT    NOT NULL,
         DailyWordLimit INTEGER          DEFAULT 10,
-        CreatedAt      TEXT    NOT NULL DEFAULT (datetime('now'))
+        CreatedAt        TEXT    NOT NULL DEFAULT (datetime('now')),
+        SecurityQuestion TEXT,
+        SecurityAnswer   TEXT
       )
     ''');
   }
@@ -158,6 +164,11 @@ class DatabaseHelper {
     return sha256.convert(bytes).toString();
   }
 
+  String _hashAnswer(String answer) {
+    final bytes = utf8.encode(answer.trim().toLowerCase());
+    return sha256.convert(bytes).toString();
+  }
+
   // ─────────────────────────────────────────────
   // KULLANICI İŞLEMLERİ
   // ─────────────────────────────────────────────
@@ -174,6 +185,91 @@ class DatabaseHelper {
         },
         // Aynı email ile ikinci kayıt denemesinde exception yerine false dön.
         conflictAlgorithm: ConflictAlgorithm.abort,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> registerUserWithSecurityQuestion(
+    String email,
+    String password,
+    String securityQuestion,
+    String securityAnswer,
+  ) async {
+    try {
+      final db = await instance.database;
+      await db.insert(
+        'Users',
+        {
+          'UserName': email.split('@').first,
+          'Email': email,
+          'PasswordHash': _hashPassword(email, password),
+          'SecurityQuestion': securityQuestion,
+          'SecurityAnswer': _hashAnswer(securityAnswer),
+        },
+        conflictAlgorithm: ConflictAlgorithm.abort,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<String?> getSecurityQuestion(String userName) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.query(
+        'Users',
+        columns: ['SecurityQuestion'],
+        where: 'UserName = ?',
+        whereArgs: [userName],
+        limit: 1,
+      );
+      if (rows.isEmpty) return null;
+      return rows.first['SecurityQuestion'] as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> verifySecurityAnswer(String userName, String securityAnswer) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.query(
+        'Users',
+        columns: ['SecurityAnswer'],
+        where: 'UserName = ?',
+        whereArgs: [userName],
+        limit: 1,
+      );
+      if (rows.isEmpty) return false;
+      final storedHash = rows.first['SecurityAnswer'] as String?;
+      if (storedHash == null) return false;
+      return storedHash == _hashAnswer(securityAnswer);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword(String userName, String newPassword) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.query(
+        'Users',
+        columns: ['Email'],
+        where: 'UserName = ?',
+        whereArgs: [userName],
+        limit: 1,
+      );
+      if (rows.isEmpty) return false;
+      final email = rows.first['Email'] as String;
+      await db.update(
+        'Users',
+        {'PasswordHash': _hashPassword(email, newPassword)},
+        where: 'UserName = ?',
+        whereArgs: [userName],
       );
       return true;
     } catch (_) {

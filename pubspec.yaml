@@ -35,7 +35,7 @@ dependencies:
   path: ^1.9.0
   crypto: ^3.0.3
   cupertino_icons: ^1.0.8
-  google_generative_ai: ^0.4.6
+  google_generative_ai: ^0.4.7
   flutter_dotenv: ^5.2.1
   http: ^1.2.2
   gal: ^2.3.0

@@ -32,10 +32,14 @@ class StoryResultScreen extends StatelessWidget {
                     width: double.infinity,
                     height: 200,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.image, size: 64, color: Colors.grey),
+                    child: Icon(
+                      Icons.image,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
             const SizedBox(height: 24),
 

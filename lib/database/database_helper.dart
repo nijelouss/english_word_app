@@ -326,9 +326,11 @@ class DatabaseHelper {
       final dueWords = await db.rawQuery(
         '''
         SELECT w.WordID, w.EngWordName, w.TurWordName,
-               w.LeitnerLevel, w.IsLearned, w.NextReviewDate, w.LastReviewedDate
+               w.LeitnerLevel, w.IsLearned, w.NextReviewDate, w.LastReviewedDate,
+               ws.EngSample
         FROM   Words   w
-        INNER JOIN Folders f ON f.FolderID = w.FolderID
+        INNER JOIN Folders      f  ON f.FolderID  = w.FolderID
+        LEFT  JOIN WordSamples  ws ON ws.WordID    = w.WordID
         WHERE  f.UserID           = ?
           AND  w.IsLearned        = 0
           AND  w.LastReviewedDate IS NOT NULL
@@ -342,9 +344,11 @@ class DatabaseHelper {
       final newWords = await db.rawQuery(
         '''
         SELECT w.WordID, w.EngWordName, w.TurWordName,
-               w.LeitnerLevel, w.IsLearned, w.NextReviewDate, w.LastReviewedDate
+               w.LeitnerLevel, w.IsLearned, w.NextReviewDate, w.LastReviewedDate,
+               ws.EngSample
         FROM   Words   w
-        INNER JOIN Folders f ON f.FolderID = w.FolderID
+        INNER JOIN Folders      f  ON f.FolderID  = w.FolderID
+        LEFT  JOIN WordSamples  ws ON ws.WordID    = w.WordID
         WHERE  f.UserID           = ?
           AND  w.IsLearned        = 0
           AND  w.LastReviewedDate IS NULL
@@ -498,6 +502,24 @@ class DatabaseHelper {
         WHERE  w.IsLearned = 1
         ORDER BY w.EngWordName ASC
         ''',
+      );
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getAllWordsByUser(int userId) async {
+    try {
+      final db = await instance.database;
+      return await db.rawQuery(
+        '''
+        SELECT w.WordID, w.EngWordName, w.TurWordName, w.IsLearned
+        FROM   Words   w
+        INNER JOIN Folders f ON f.FolderID = w.FolderID
+        WHERE  f.UserID = ?
+        ORDER BY w.EngWordName ASC
+        ''',
+        [userId],
       );
     } catch (_) {
       return [];

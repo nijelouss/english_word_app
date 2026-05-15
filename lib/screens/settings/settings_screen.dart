@@ -69,9 +69,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Günlük Yeni Kelime Sayısı',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             const Text('Her gün sınavda kaç yeni kelime gösterilsin?'),

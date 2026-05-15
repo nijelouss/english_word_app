@@ -27,7 +27,7 @@ class _WordSelectionScreenState extends State<WordSelectionScreen> {
   }
 
   Future<void> _loadWords() async {
-    final words = await DatabaseHelper.instance.getLearnedWords();
+    final words = await DatabaseHelper.instance.getAllWordsByUser(widget.userId);
     setState(() {
       _words = words;
       _isLoading = false;
@@ -67,10 +67,11 @@ class _WordSelectionScreenState extends State<WordSelectionScreen> {
         ),
       );
 
-    } on GeminiException catch (_) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Hikaye oluşturulamadı, tekrar deneyin')),
-      );
+    } on GeminiException catch (e) {
+      final msg = e.message.contains('quota')
+          ? 'API kotası aşıldı, birkaç dakika bekleyip tekrar deneyin'
+          : 'Hikaye oluşturulamadı, tekrar deneyin';
+      messenger.showSnackBar(SnackBar(content: Text(msg)));
     } on ImageDownloadException catch (_) {
       messenger.showSnackBar(
         const SnackBar(content: Text('Görsel indirilemedi ama hikaye kaydedildi')),

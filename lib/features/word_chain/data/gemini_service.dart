@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -8,7 +11,7 @@ import 'package:english_word_app/core/app_config.dart';
 import 'package:english_word_app/core/exceptions.dart';
 
 class GeminiService {
-  static const _modelName = 'gemini-2.0-flash-lite';
+  static const _modelName = 'gemini-2.0-flash';
 
   Future<Map<String, String?>?> generateStory(
     List<String> words,
@@ -32,11 +35,17 @@ class GeminiService {
       }
     }
 
+    final apiKey = AppConfig.geminiApiKey;
+    if (apiKey.isEmpty) {
+      throw GeminiException('GEMINI_API_KEY .env dosyasında tanımlı değil');
+    }
+    debugPrint('[GeminiService] Key: ${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}');
+
     late final GenerateContentResponse response;
     try {
       final model = GenerativeModel(
         model: _modelName,
-        apiKey: AppConfig.geminiApiKey,
+        apiKey: apiKey,
         generationConfig: GenerationConfig(
           responseMimeType: 'application/json',
         ),
@@ -47,8 +56,12 @@ class GeminiService {
           .timeout(const Duration(seconds: 30));
     } on TimeoutException {
       throw TimeoutAppException('Gemini isteği zaman aşımına uğradı');
+    } on SocketException catch (e) {
+      debugPrint('[GeminiService] SocketException: $e');
+      throw NetworkException('Ağ bağlantısı hatası: $e');
     } catch (e) {
-      throw NetworkException('Gemini bağlantı hatası: $e');
+      debugPrint('[GeminiService] Hata: $e');
+      throw GeminiException('Gemini API hatası: $e');
     }
 
     final text = response.text;

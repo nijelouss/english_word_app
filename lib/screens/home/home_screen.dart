@@ -3,6 +3,7 @@ import 'package:english_word_app/screens/auth/login_screen.dart';
 import 'package:english_word_app/features/word_chain/screens/word_selection_screen.dart';
 import 'package:english_word_app/screens/word/add_word_screen.dart';
 import 'package:english_word_app/screens/settings/settings_screen.dart';
+import 'package:english_word_app/screens/quiz/quiz_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int userId;
@@ -73,7 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.quiz_outlined,
               title: 'Günlük Sınav',
               description: 'Bugünün kelimelerini test et',
-              onTap: _showComingSoon,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => QuizScreen(userId: widget.userId),
+                  ),
+                );
+              },
             ),
             _buildMenuCard(
               icon: Icons.games_outlined,

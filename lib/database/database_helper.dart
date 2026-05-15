@@ -525,6 +525,31 @@ class DatabaseHelper {
       return [];
     }
   }
+  // ─────────────────────────────────────────────
+  // ANALİZ
+  // ─────────────────────────────────────────────
+
+   Future<List<Map<String, dynamic>>> getFolderStats(int userId) async {
+    try {
+    final db = await instance.database;
+    return await db.rawQuery( 
+    '''
+    SELECT
+      f.FolderName,
+      COUNT(w.WordID)                                    AS TotalWords,
+      SUM(CASE WHEN w.IsLearned = 1 THEN 1 ELSE 0 END)  AS LearnedWords
+    FROM Folders f
+    LEFT JOIN Words w ON w.FolderID = f.FolderID
+    WHERE f.UserID = ?
+    GROUP BY f.FolderID, f.FolderName
+    ORDER BY f.FolderName ASC
+    ''',
+    [userId],
+    );
+  } catch (_) {
+    return [];
+  }
+  }
 
   Future<bool> insertStory(Story story) async {
     try {

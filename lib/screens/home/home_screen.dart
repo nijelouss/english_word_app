@@ -5,6 +5,7 @@ import 'package:english_word_app/screens/word/add_word_screen.dart';
 import 'package:english_word_app/screens/settings/settings_screen.dart';
 import 'package:english_word_app/screens/quiz/quiz_screen.dart';
 import 'package:english_word_app/screens/wordle/wordle_screen.dart';
+import 'package:english_word_app/screens/analysis/analysis_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final int userId;
@@ -22,12 +23,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   
-  void _showComingSoon() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Bu özellik yakında eklenecek')),
-    );
-  }
-
   void _logout() {
     Navigator.pushAndRemoveUntil(
       context,
@@ -115,7 +110,14 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.bar_chart,
               title: 'Analiz',
               description: 'Başarı durumun',
-              onTap: _showComingSoon,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AnalysisScreen(userId: widget.userId),
+                  ),
+                );
+              },
             ),
             _buildMenuCard(
               icon: Icons.settings,

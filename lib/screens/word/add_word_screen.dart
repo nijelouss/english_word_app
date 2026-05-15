@@ -33,8 +33,6 @@ class _AddWordScreenState extends State<AddWordScreen> {
     final engSampleText = _engSampleController.text.trim();
     final turSampleText = _turSampleController.text.trim();
     
-    // TODO: Backend'de Picture parametresi eklenince DB'ye gönderilecek
-    // final picturePath = _picturePathController.text.trim();
 
     if (engText.isEmpty || turText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

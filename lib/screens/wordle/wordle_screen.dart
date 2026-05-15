@@ -127,7 +127,7 @@ class _WordleScreenState extends State<WordleScreen> {
       case LetterMatch.present:
         return cs.tertiary;
       case LetterMatch.absent:
-        return cs.surfaceVariant;
+        return cs.surfaceContainerHighest;
     }
   }
 

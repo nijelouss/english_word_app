@@ -169,6 +169,92 @@ class DatabaseHelper {
     return sha256.convert(bytes).toString();
   }
 
+  // ── Seed veri ────────────────────────────────────────────────────────────
+
+  static const List<Map<String, String>> _seedWords = [
+    {'eng': 'apple',    'tur': 'elma'},
+    {'eng': 'water',    'tur': 'su'},
+    {'eng': 'bread',    'tur': 'ekmek'},
+    {'eng': 'milk',     'tur': 'süt'},
+    {'eng': 'sugar',    'tur': 'şeker'},
+    {'eng': 'house',    'tur': 'ev'},
+    {'eng': 'table',    'tur': 'masa'},
+    {'eng': 'chair',    'tur': 'sandalye'},
+    {'eng': 'door',     'tur': 'kapı'},
+    {'eng': 'window',   'tur': 'pencere'},
+    {'eng': 'book',     'tur': 'kitap'},
+    {'eng': 'pen',      'tur': 'kalem'},
+    {'eng': 'paper',    'tur': 'kağıt'},
+    {'eng': 'phone',    'tur': 'telefon'},
+    {'eng': 'computer', 'tur': 'bilgisayar'},
+    {'eng': 'car',      'tur': 'araba'},
+    {'eng': 'train',    'tur': 'tren'},
+    {'eng': 'plane',    'tur': 'uçak'},
+    {'eng': 'road',     'tur': 'yol'},
+    {'eng': 'bridge',   'tur': 'köprü'},
+    {'eng': 'sun',      'tur': 'güneş'},
+    {'eng': 'moon',     'tur': 'ay'},
+    {'eng': 'star',     'tur': 'yıldız'},
+    {'eng': 'cloud',    'tur': 'bulut'},
+    {'eng': 'rain',     'tur': 'yağmur'},
+    {'eng': 'tree',     'tur': 'ağaç'},
+    {'eng': 'flower',   'tur': 'çiçek'},
+    {'eng': 'grass',    'tur': 'çimen'},
+    {'eng': 'river',    'tur': 'nehir'},
+    {'eng': 'mountain', 'tur': 'dağ'},
+    {'eng': 'happy',    'tur': 'mutlu'},
+    {'eng': 'sad',      'tur': 'üzgün'},
+    {'eng': 'angry',    'tur': 'kızgın'},
+    {'eng': 'tired',    'tur': 'yorgun'},
+    {'eng': 'busy',     'tur': 'meşgul'},
+    {'eng': 'smile',    'tur': 'gülümseme'},
+    {'eng': 'laugh',    'tur': 'gülmek'},
+    {'eng': 'sleep',    'tur': 'uyumak'},
+    {'eng': 'dream',    'tur': 'rüya'},
+    {'eng': 'read',     'tur': 'okumak'},
+    {'eng': 'write',    'tur': 'yazmak'},
+    {'eng': 'run',      'tur': 'koşmak'},
+    {'eng': 'walk',     'tur': 'yürümek'},
+    {'eng': 'eat',      'tur': 'yemek'},
+    {'eng': 'drink',    'tur': 'içmek'},
+    {'eng': 'night',    'tur': 'gece'},
+    {'eng': 'day',      'tur': 'gün'},
+    {'eng': 'year',     'tur': 'yıl'},
+    {'eng': 'month',    'tur': 'ay'},
+    {'eng': 'week',     'tur': 'hafta'},
+  ];
+
+  Future<int> _getOrCreateGeneralFolder(Database db, int userId) async {
+    final existing = await db.query(
+      'Folders',
+      columns: ['FolderID'],
+      where: 'UserID = ? AND FolderName = ?',
+      whereArgs: [userId, 'Genel'],
+      limit: 1,
+    );
+    if (existing.isNotEmpty) return existing.first['FolderID'] as int;
+    return db.insert('Folders', {'UserID': userId, 'FolderName': 'Genel'});
+  }
+
+  Future<void> _insertSeedWords(int userId) async {
+    final db    = await database;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final folderId = await _getOrCreateGeneralFolder(db, userId);
+
+    final batch = db.batch();
+    for (final word in _seedWords) {
+      batch.insert('Words', {
+        'FolderID':      folderId,
+        'EngWordName':   word['eng'],
+        'TurWordName':   word['tur'],
+        'LeitnerLevel':  1,
+        'IsLearned':     0,
+        'NextReviewDate': today,
+      });
+    }
+    await batch.commit(noResult: true);
+  }
+
   // ─────────────────────────────────────────────
   // KULLANICI İŞLEMLERİ
   // ─────────────────────────────────────────────
@@ -176,7 +262,7 @@ class DatabaseHelper {
   Future<bool> registerUser(String email, String password) async {
     try {
       final db = await instance.database;
-      await db.insert(
+      final newUserId = await db.insert(
         'Users',
         {
           'UserName': email.split('@').first,
@@ -186,6 +272,7 @@ class DatabaseHelper {
         // Aynı email ile ikinci kayıt denemesinde exception yerine false dön.
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
+      await _insertSeedWords(newUserId);
       return true;
     } catch (_) {
       return false;
@@ -200,7 +287,7 @@ class DatabaseHelper {
   ) async {
     try {
       final db = await instance.database;
-      await db.insert(
+      final newUserId = await db.insert(
         'Users',
         {
           'UserName': email.split('@').first,
@@ -211,6 +298,7 @@ class DatabaseHelper {
         },
         conflictAlgorithm: ConflictAlgorithm.abort,
       );
+      await _insertSeedWords(newUserId);
       return true;
     } catch (_) {
       return false;
@@ -277,6 +365,54 @@ class DatabaseHelper {
     }
   }
 
+  /// Eski şifreyi doğrulayarak yeni şifre kaydeder.
+  /// Eski şifre yanlışsa [false] döner.
+  Future<bool> updatePassword(
+      int userId, String oldPassword, String newPassword) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.query(
+        'Users',
+        columns: ['Email', 'PasswordHash'],
+        where: 'UserID = ?',
+        whereArgs: [userId],
+        limit: 1,
+      );
+      if (rows.isEmpty) return false;
+      final email        = rows.first['Email'] as String;
+      final storedHash   = rows.first['PasswordHash'] as String;
+      if (storedHash != _hashPassword(email, oldPassword)) return false;
+      await db.update(
+        'Users',
+        {'PasswordHash': _hashPassword(email, newPassword)},
+        where: 'UserID = ?',
+        whereArgs: [userId],
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Kullanıcıya ait tüm Folders (→ Words → WordSamples CASCADE) ve
+  /// Stories tablosunu siler. Users tablosuna dokunulmaz.
+  Future<bool> resetUserData(int userId) async {
+    try {
+      final db = await instance.database;
+      await db.transaction((txn) async {
+        await txn.delete('Stories');
+        await txn.delete(
+          'Folders',
+          where: 'UserID = ?',
+          whereArgs: [userId],
+        );
+      });
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Başarılı girişte [UserID] döner, hatalı kimlik bilgisinde [null] döner.
   Future<int?> loginUser(String email, String password) async {
     try {
@@ -330,6 +466,28 @@ class DatabaseHelper {
   // ─────────────────────────────────────────────
   // KELİME İŞLEMLERİ
   // ─────────────────────────────────────────────
+
+  /// Kullanıcıya ait kelimeler arasında aynı İngilizce kelime var mı kontrol eder.
+  /// Karşılaştırma büyük/küçük harf duyarsızdır (LOWER).
+  Future<bool> wordExists(int userId, String engWord) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.rawQuery(
+        '''
+        SELECT COUNT(*) AS Cnt
+        FROM   Words   w
+        INNER JOIN Folders f ON f.FolderID = w.FolderID
+        WHERE  f.UserID             = ?
+          AND  LOWER(w.EngWordName) = LOWER(?)
+        ''',
+        [userId, engWord.trim()],
+      );
+      if (rows.isEmpty) return false;
+      return ((rows.first['Cnt'] as num?)?.toInt() ?? 0) > 0;
+    } catch (_) {
+      return false;
+    }
+  }
 
   /// Words ve (varsa) WordSamples kayıtlarını tek bir transaction içinde ekler.
   /// Transaction sayesinde Words eklendikten sonra WordSamples eklenirken hata çıkarsa
@@ -431,7 +589,7 @@ class DatabaseHelper {
           AND  w.IsLearned        = 0
           AND  w.LastReviewedDate IS NOT NULL
           AND  w.NextReviewDate   <= ?
-        ORDER BY w.NextReviewDate ASC
+        ORDER BY w.NextReviewDate ASC, w.LeitnerLevel ASC, w.WordID ASC
         ''',
         [userId, today],
       );
@@ -448,7 +606,7 @@ class DatabaseHelper {
         WHERE  f.UserID           = ?
           AND  w.IsLearned        = 0
           AND  w.LastReviewedDate IS NULL
-        ORDER BY w.CreatedAt ASC
+        ORDER BY w.CreatedAt ASC, w.WordID ASC
         LIMIT ?
         ''',
         [userId, dailyLimit],
@@ -671,6 +829,114 @@ class DatabaseHelper {
       };
     } catch (_) {
       return {'total': 0, 'active': 0, 'learned': 0};
+    }
+  }
+
+  /// Her Leitner kutusundaki kelime sayısını döner: {1: 25, 2: 10, ...}
+  /// IsLearned=1 olan kelimeler de LeitnerLevel=6'da yer alır.
+  Future<Map<int, int>> getWordCountByLevel(int userId) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.rawQuery(
+        '''
+        SELECT w.LeitnerLevel, COUNT(*) AS Cnt
+        FROM   Words   w
+        INNER JOIN Folders f ON f.FolderID = w.FolderID
+        WHERE  f.UserID = ?
+        GROUP  BY w.LeitnerLevel
+        ''',
+        [userId],
+      );
+      final Map<int, int> result = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+      for (final row in rows) {
+        final level = row['LeitnerLevel'] as int;
+        result[level] = row['Cnt'] as int? ?? 0;
+      }
+      return result;
+    } catch (_) {
+      return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0};
+    }
+  }
+
+  /// Son [days] günde öğrenilen (IsLearned=1 olan) kelime sayısını,
+  /// günlük olarak [en eskiden → en yeniye] döner.
+  /// Eksik günler 0 ile doldurulur.
+  Future<List<int>> getLearnedWordsLastNDays(int userId, int days) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.rawQuery(
+        '''
+        SELECT date(w.LastReviewedDate) AS d, COUNT(*) AS Cnt
+        FROM   Words   w
+        INNER JOIN Folders f ON f.FolderID = w.FolderID
+        WHERE  f.UserID    = ?
+          AND  w.IsLearned = 1
+          AND  w.LastReviewedDate >= date('now', ? || ' days')
+        GROUP  BY d
+        ORDER  BY d ASC
+        ''',
+        [userId, '-$days'],
+      );
+
+      final Map<String, int> byDate = {};
+      for (final row in rows) {
+        byDate[row['d'] as String] = row['Cnt'] as int? ?? 0;
+      }
+
+      final today = DateTime.now();
+      return List.generate(days, (i) {
+        final date = today.subtract(Duration(days: days - 1 - i));
+        final key = date.toIso8601String().substring(0, 10);
+        return byDate[key] ?? 0;
+      });
+    } catch (_) {
+      return List.filled(days, 0);
+    }
+  }
+
+  /// Üst üste kaç gündür en az 1 kelime gözden geçirildiğini döner.
+  /// Bugün veya dün ile başlamayan seriler 0 sayılır.
+  Future<int> getCurrentStreak(int userId) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.rawQuery(
+        '''
+        SELECT DISTINCT date(w.LastReviewedDate) AS d
+        FROM   Words   w
+        INNER JOIN Folders f ON f.FolderID = w.FolderID
+        WHERE  f.UserID              = ?
+          AND  w.LastReviewedDate IS NOT NULL
+        ORDER  BY d DESC
+        ''',
+        [userId],
+      );
+
+      if (rows.isEmpty) return 0;
+
+      final today = DateTime.now();
+      final todayStr =
+          today.toIso8601String().substring(0, 10);
+      final yesterdayStr =
+          today.subtract(const Duration(days: 1)).toIso8601String().substring(0, 10);
+
+      final dates = rows.map((r) => r['d'] as String).toList();
+
+      // Seri bugün veya dünden başlamalı
+      if (dates.first != todayStr && dates.first != yesterdayStr) return 0;
+
+      int streak = 1;
+      for (int i = 1; i < dates.length; i++) {
+        final prev = DateTime.parse(dates[i - 1]);
+        final curr = DateTime.parse(dates[i]);
+        if (prev.difference(curr).inDays == 1) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return streak;
+    } catch (_) {
+      return 0;
     }
   }
 

@@ -45,6 +45,8 @@ dependencies:
   permission_handler: ^11.3.1
   pdf: ^3.11.0
   printing: ^5.13.0
+  fl_chart: ^0.69.0
+  shared_preferences: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +58,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.0
+  flutter_launcher_icons: ^0.14.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -71,6 +75,7 @@ flutter:
   assets:
     - .env
     - assets/demo/
+    - assets/icon/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
@@ -91,3 +96,30 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# ── Splash Screen ───────────────────────────────────────────────────────────
+# flutter_native_splash konfigürasyonu.
+# Değiştirdikten sonra: dart run flutter_native_splash:create
+# ── App Icon ────────────────────────────────────────────────────────────────
+# flutter_launcher_icons konfigürasyonu.
+# Değiştirdikten sonra: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/engame_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#6750A4"
+  adaptive_icon_foreground: "assets/icon/engame_icon.png"
+
+# ── Splash Screen ───────────────────────────────────────────────────────────
+# flutter_native_splash konfigürasyonu.
+# Değiştirdikten sonra: dart run flutter_native_splash:create
+flutter_native_splash:
+  color: "#6750A4"
+  color_dark: "#1C1B1F"
+  image: "assets/icon/engame_icon.png"
+  image_dark: "assets/icon/engame_icon.png"
+  android_12:
+    color: "#6750A4"
+    color_dark: "#1C1B1F"
+    image: "assets/icon/engame_icon.png"

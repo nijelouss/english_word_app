@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../database/database_helper.dart';
+import '../../core/engame_logo.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -41,8 +43,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 32),
+            const Center(child: EngameLogo(size: 64)),
+            const SizedBox(height: 12),
+            Center(
+              child: Text(
+                'engame',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,

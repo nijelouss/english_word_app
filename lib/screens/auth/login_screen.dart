@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:english_word_app/database/database_helper.dart';
 import 'package:english_word_app/screens/auth/register_screen.dart';
 import 'package:english_word_app/screens/auth/forgot_password_screen.dart';
 import 'package:english_word_app/screens/home/home_screen.dart';
 import 'package:english_word_app/core/page_transitions.dart';
 import 'package:english_word_app/core/animated_press_button.dart';
+import 'package:english_word_app/core/engame_logo.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,11 +30,35 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Giriş Yap')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 48),
+            const Center(child: EngameLogo(size: 100)),
+            const SizedBox(height: 16),
+            Center(
+              child: Text(
+                'engame',
+                style: GoogleFonts.poppins(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: Theme.of(context).colorScheme.primary,
+                  letterSpacing: -1.5,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: Text(
+                'İngilizce öğrenmenin oyunlaşmış hali',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            const SizedBox(height: 48),
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,

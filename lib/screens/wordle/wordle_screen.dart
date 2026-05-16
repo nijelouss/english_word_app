@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
 import 'package:english_word_app/game/wordle_engine.dart';
+import 'package:english_word_app/core/animated_press_button.dart';
 
 class WordleScreen extends StatefulWidget {
   final int userId;
@@ -94,12 +95,28 @@ class _WordleScreenState extends State<WordleScreen> {
               : 'Doğru kelime: $_targetWord',
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _resetGame();
-            },
-            child: const Text('Tekrar Oyna'),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FilledButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    _resetGame();
+                  },
+                  child: const Text('Tekrar Oyna'),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Ana Menü'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -218,7 +235,7 @@ class _WordleScreenState extends State<WordleScreen> {
                       onSubmitted: (_) => _submitGuess(),
                     ),
                     const SizedBox(height: 16),
-                    ElevatedButton(
+                    AnimatedPressButton(
                       onPressed: _submitGuess,
                       child: const Text('Tahmin Et'),
                     ),

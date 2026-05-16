@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:english_word_app/core/page_transitions.dart';
 import 'package:english_word_app/features/word_chain/models/story.dart';
 import 'package:english_word_app/features/word_chain/screens/story_history_screen.dart';
 
@@ -74,9 +75,7 @@ class StoryResultScreen extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const StoryHistoryScreen(),
-                  ),
+                  SlideFadePageRoute(page: const StoryHistoryScreen()),
                 ),
                 child: const Text('Geçmiş Hikayeler'),
               ),

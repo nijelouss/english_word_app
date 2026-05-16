@@ -647,6 +647,33 @@ class DatabaseHelper {
   }
   }
 
+  Future<Map<String, int>> getHomeStats(int userId) async {
+    try {
+      final db = await instance.database;
+      final rows = await db.rawQuery(
+        '''
+        SELECT
+          COUNT(w.WordID)                                          AS TotalWords,
+          SUM(CASE WHEN w.LeitnerLevel >= 2 THEN 1 ELSE 0 END)   AS ActiveWords,
+          SUM(CASE WHEN w.IsLearned = 1 THEN 1 ELSE 0 END)       AS LearnedWords
+        FROM Folders f
+        LEFT JOIN Words w ON w.FolderID = f.FolderID
+        WHERE f.UserID = ?
+        ''',
+        [userId],
+      );
+      if (rows.isEmpty) return {'total': 0, 'active': 0, 'learned': 0};
+      final r = rows.first;
+      return {
+        'total': (r['TotalWords'] as int? ?? 0),
+        'active': (r['ActiveWords'] as int? ?? 0),
+        'learned': (r['LearnedWords'] as int? ?? 0),
+      };
+    } catch (_) {
+      return {'total': 0, 'active': 0, 'learned': 0};
+    }
+  }
+
   Future<bool> insertStory(Story story) async {
     try {
       final db = await instance.database;

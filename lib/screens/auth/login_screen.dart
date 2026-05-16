@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
 import 'package:english_word_app/screens/auth/register_screen.dart';
 import 'package:english_word_app/screens/auth/forgot_password_screen.dart';
-// Senin yazdığın ana menüyü buraya bağladık!
-import 'package:english_word_app/screens/home/home_screen.dart'; 
+import 'package:english_word_app/screens/home/home_screen.dart';
+import 'package:english_word_app/core/page_transitions.dart';
+import 'package:english_word_app/core/animated_press_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -52,44 +53,47 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 24),
             
             // GİRİŞ YAP BUTONU
-            ElevatedButton(
-              onPressed: () async {
-                final email = _emailController.text;
-                final password = _passwordController.text;
+            SizedBox(
+              width: double.infinity,
+              child: AnimatedPressButton(
+                onPressed: () async {
+                  final email = _emailController.text;
+                  final password = _passwordController.text;
 
-                if (email.isEmpty || password.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Lütfen tüm alanları doldurun')),
+                  if (email.isEmpty || password.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Lütfen tüm alanları doldurun')),
+                    );
+                    return;
+                  }
+
+                  final messenger = ScaffoldMessenger.of(context);
+                  final navigator = Navigator.of(context);
+
+                  final userId = await DatabaseHelper.instance.loginUser(
+                    email,
+                    password,
                   );
-                  return;
-                }
 
-                final messenger = ScaffoldMessenger.of(context);
-                final navigator = Navigator.of(context);
+                  if (!mounted) return;
 
-                final userId = await DatabaseHelper.instance.loginUser(
-                  email,
-                  password,
-                );
-
-                if (!mounted) return;
-
-                if (userId != null) {
-                  navigator.pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => HomeScreen(
-                        userId: userId,
-                        userName: email.split('@')[0],
+                  if (userId != null) {
+                    navigator.pushReplacement(
+                      SlideFadePageRoute(
+                        page: HomeScreen(
+                          userId: userId,
+                          userName: email.split('@')[0],
+                        ),
                       ),
-                    ),
-                  );
-                } else {
-                  messenger.showSnackBar(
-                    const SnackBar(content: Text('E-posta veya şifre yanlış')),
-                  );
-                }
-              },
-              child: const Text('Giriş Yap'),
+                    );
+                  } else {
+                    messenger.showSnackBar(
+                      const SnackBar(content: Text('E-posta veya şifre yanlış')),
+                    );
+                  }
+                },
+                child: const Text('Giriş Yap'),
+              ),
             ),
             
             const SizedBox(height: 12),
@@ -99,9 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => RegisterScreen(),
-                  ),
+                  SlideFadePageRoute(page: RegisterScreen()),
                 );
               },
               child: const Text('Hesabın yok mu? Kayıt Ol'),
@@ -111,9 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const ForgotPasswordScreen(),
-                  ),
+                  SlideFadePageRoute(page: const ForgotPasswordScreen()),
                 );
               },
               child: const Text('Şifremi Unuttum'),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
+import 'package:english_word_app/core/animated_press_button.dart';
 
 class AddWordScreen extends StatefulWidget {
   final int userId;
@@ -141,7 +142,7 @@ class _AddWordScreenState extends State<AddWordScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
+            AnimatedPressButton(
               onPressed: _saveWord,
               child: const Text('Kelimeyi Kaydet'),
             ),

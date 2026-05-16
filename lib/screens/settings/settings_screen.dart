@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../database/database_helper.dart';
+import '../../core/theme_notifier.dart';
 
 class SettingsScreen extends StatefulWidget {
   final int userId;
@@ -88,6 +89,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ElevatedButton(
               onPressed: _saveSettings,
               child: const Text('Kaydet'),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Tema',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 12),
+            ValueListenableBuilder<ThemeMode>(
+              valueListenable: themeNotifier,
+              builder: (context, themeMode, _) {
+                return SegmentedButton<ThemeMode>(
+                  segments: const [
+                    ButtonSegment(
+                      value: ThemeMode.light,
+                      label: Text('Açık'),
+                      icon: Icon(Icons.light_mode_outlined),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.system,
+                      label: Text('Otomatik'),
+                      icon: Icon(Icons.brightness_auto_outlined),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.dark,
+                      label: Text('Koyu'),
+                      icon: Icon(Icons.dark_mode_outlined),
+                    ),
+                  ],
+                  selected: {themeMode},
+                  onSelectionChanged: (selection) {
+                    themeNotifier.value = selection.first;
+                  },
+                );
+              },
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:english_word_app/database/database_helper.dart';
+import 'package:english_word_app/core/animated_press_button.dart';
 
 class QuizScreen extends StatefulWidget {
   final int userId;
@@ -169,7 +170,7 @@ class _QuizScreenState extends State<QuizScreen> {
           ],
           const SizedBox(height: 32),
           if (!_isRevealed)
-            ElevatedButton(
+            AnimatedPressButton(
               onPressed: () => setState(() => _isRevealed = true),
               child: const Text('Göster'),
             ),
@@ -177,19 +178,30 @@ class _QuizScreenState extends State<QuizScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton.icon(
+                AnimatedPressButton(
                   onPressed: () => _nextWord(wordId, false),
-                  icon: const Icon(Icons.close),
-                  label: const Text('Bilemedi'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                    foregroundColor: Theme.of(context).colorScheme.onError,
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.close, size: 18),
+                      SizedBox(width: 8),
+                      Text('Bilemedi'),
+                    ],
                   ),
                 ),
-                ElevatedButton.icon(
+                AnimatedPressButton(
                   onPressed: () => _nextWord(wordId, true),
-                  icon: const Icon(Icons.check),
-                  label: const Text('Bildi'),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.check, size: 18),
+                      SizedBox(width: 8),
+                      Text('Bildi'),
+                    ],
+                  ),
                 ),
               ],
             ),

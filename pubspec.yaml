@@ -39,6 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   google_generative_ai: ^0.4.7
   flutter_dotenv: ^5.2.1
+  google_fonts: ^6.2.1
   http: ^1.2.2
   gal: ^2.3.0
   permission_handler: ^11.3.1
